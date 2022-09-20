@@ -4,24 +4,36 @@ import Seo from '../components/seo';
 import { graphql } from 'gatsby';
 
 const BlogPage = ({ data }) => {
-  console.log(data);
   return (
     <Layout pageTitle="My Blog Posts">
-      <p>My cool posts will go in here</p>
-      <ul>
-        {data.allFile.nodes.map((e) => (
-          <li key={e.name}>{e.name}</li>
-        ))}
-      </ul>
+      {data.allMdx.nodes.map((node) => (
+        <article key={node.id}>
+          <h2>{node.frontmatter.title}</h2>
+          <p>Posted: {node.frontmatter.date}</p>
+          <p>Updated: {node.parent.modifiedTime}</p>
+          <p>{node.excerpt}</p>
+        </article>
+      ))}
     </Layout>
   );
 };
 
 export const query = graphql`
-  query MyQuery {
-    allFile {
+  query {
+    allMdx(sort: { fields: frontmatter___date, order: DESC }) {
       nodes {
-        name
+        frontmatter {
+          title
+          date(formatString: "MMM DD, YYYY")
+        }
+        id
+        excerpt
+        parent {
+          ... on File {
+            id
+            modifiedTime(formatString: "MMMM DD, YYYY")
+          }
+        }
       }
     }
   }
